@@ -19,7 +19,7 @@ Set-ExecutionPolicy -Scope Process Bypass -Force
 .\scripts\install_tools.ps1
 ```
 
-Нужны: **Git**, **Miniconda**, **Docker Desktop** (Docker — с недели 10).
+Нужны: **Git**, **Miniconda**, **Docker Desktop** (Postgres — с недели 5).
 
 ### 2. Окружение Python (неделя 1)
 
@@ -83,12 +83,50 @@ conda run -n tp-v03 python -m sem2_de.cli pipeline
 
 ---
 
+## Неделя 5 — Postgres + load
+
+### 1. Поднять Postgres (Docker)
+
+```bat
+scripts\run_postgres.bat
+docker ps
+```
+
+Параметры: `localhost:5432`, БД `tp_variant_03`, user `tp_user` (см. `docker-compose.yml`).
+
+### 2. Подключение (секреты в `.env`)
+
+```bat
+copy .env.example .env
+```
+
+`DATABASE_URL=postgresql+psycopg2://tp_user:tp_pass@localhost:5432/tp_variant_03`
+
+### 3. Загрузка mart в Postgres
+
+```bat
+scripts\run_load.bat
+```
+
+Таблица: `mart_variant_03` (стратегия `replace`, идемпотентный повторный запуск).
+
+SQL-проверки: `docs/sql_checks.md`
+
+### Часть 0 (SQLite + commit)
+
+```bat
+conda run -n tp-v03 python broken_sqlite_commit.py
+```
+
+---
+
 ## Учебные скрипты (часть 0)
 
 ```bat
 conda run -n tp-v03 python broken_env.py
 conda run -n tp-v03 python broken_pandas_read.py
 conda run -n tp-v03 python broken_merge.py
+conda run -n tp-v03 python broken_sqlite_commit.py
 ```
 
 ---
@@ -102,7 +140,7 @@ docs/             # Data_Contract, Implementation_Plan, LLM_Usage_Log
 notebooks/        # week3_eda.ipynb
 reference/        # cities, countries, ...
 scripts/          # setup_env.bat, run_*.bat
-src/sem2_de/      # extract, normalize, mart, cli
+src/sem2_de/      # extract, normalize, mart, load, cli
 tests/
 ```
 

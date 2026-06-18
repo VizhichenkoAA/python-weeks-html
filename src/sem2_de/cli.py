@@ -4,6 +4,7 @@ import argparse
 from pathlib import Path
 
 from sem2_de.extract import run_extract
+from sem2_de.load import run_load
 from sem2_de.mart import run_mart
 from sem2_de.normalize import run_normalize
 
@@ -17,6 +18,8 @@ def main() -> None:
     p_norm.add_argument("--raw", type=Path, default=None)
     p_mart = sub.add_parser("mart", help="normalized CSV -> mart daily")
     p_mart.add_argument("--normalized", type=Path, default=None)
+    p_load = sub.add_parser("load", help="mart CSV -> Postgres")
+    p_load.add_argument("--mart", type=Path, default=None)
     sub.add_parser("pipeline", help="extract + normalize + mart")
 
     args = parser.parse_args()
@@ -26,6 +29,8 @@ def main() -> None:
         run_normalize(args.raw)
     elif args.command == "mart":
         run_mart(args.normalized)
+    elif args.command == "load":
+        run_load(args.mart)
     elif args.command == "pipeline":
         raw = run_extract()
         norm = run_normalize(raw)

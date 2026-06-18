@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: tp-v03-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: tp_user
+      POSTGRES_PASSWORD: tp_pass
+      POSTGRES_DB: tp_variant_03
+    ports:
+      - "5432:5432"
+    volumes:
+      - tp_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tp_user -d tp_variant_03"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  tp_pg_data:

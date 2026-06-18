@@ -63,3 +63,6 @@ mart:
   grain: day
   reference_key: city_id
   reference_file: reference/cities.csv
+postgres:
+  table: mart_variant_03
+  # Подключение: переменная окружения DATABASE_URL (см. .env.example)

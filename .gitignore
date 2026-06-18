@@ -33,3 +33,6 @@ htmlcov/
 # Airflow / Docker
 airflow/logs/
 airflow/airflow.db
+
+# Week 5 SQLite demo
+example.db

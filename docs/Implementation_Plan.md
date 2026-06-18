@@ -26,6 +26,11 @@ Open-Meteo API → RAW (JSON) → Normalize (CSV hourly) → Mart (CSV daily + r
 - **Периодичность:** 1 строка на день
 - **KPI:** T_mean, P_sum, rainy_hours, wind_max, wind_rank (топ-5 по ветру)
 
+### 4.4 Postgres (неделя 5)
+- **Таблица:** `mart_variant_03`
+- **Загрузка:** `src/sem2_de/load.py`, стратегия `replace`
+- **Проверки:** `docs/sql_checks.md`
+
 ## 5. Data Quality (DQ)
 - NOT NULL: ts, city_id
 - Диапазоны температуры/влажности/осадков (в `normalize.py`)
@@ -43,6 +48,8 @@ Open-Meteo API → RAW (JSON) → Normalize (CSV hourly) → Mart (CSV daily + r
 - `broken_pandas_read.py` — sep и пропуски
 - `broken_merge.py` — many-to-many
 - Ручной прогон `scripts\run_pipeline.bat`
+- `broken_sqlite_commit.py` — commit в SQLite
+- `scripts\run_load.bat` + запросы из `docs/sql_checks.md`
 
 ## 8. План-график (по неделям)
 | Неделя | Что делаю | Артефакт/ссылка |
@@ -51,7 +58,7 @@ Open-Meteo API → RAW (JSON) → Normalize (CSV hourly) → Mart (CSV daily + r
 | 2 | Extract Open-Meteo | `src/sem2_de/extract.py`, `data/raw/` |
 | 3 | Normalize + EDA | `normalize.py`, `notebooks/week3_eda.ipynb` |
 | 4 | Mart + reference join | `mart.py`, `data/mart/` |
-| 5 | Postgres load | TBD |
+| 5 | Postgres load mart | `load.py`, `docs/sql_checks.md`, `docker-compose.yml` |
 | 6 | Full pipeline | TBD |
 | 7 | Визуализация | TBD |
 | 8 | DQ checks | TBD |
