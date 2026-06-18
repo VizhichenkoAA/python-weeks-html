@@ -2,26 +2,29 @@
 
 Пайплайн: **API → RAW → NORMALIZED → MART → …**
 
-## Неделя 1 — окружение
+## Окружение
 
 ```bat
 scripts\setup_env.bat
-conda run -n tp-v03 python broken_env.py
 ```
 
-### Почему pip install может попасть не в тот Python?
-
-На Windows несколько интерпретаторов; `pip` в PATH может относиться к другому Python. Используйте `conda run -n tp-v03 python -m pip install ...`.
-
-## Неделя 2 — Extract (Open-Meteo)
+## Неделя 2 — Extract
 
 ```bat
 scripts\run_extract.bat
 ```
 
-Артефакт: `data/raw/variant_03/open_meteo_*.json`
+Raw: `data/raw/variant_03/open_meteo_*.json`
 
-Конфиг: `configs/variant_03.yml`
+## Неделя 3 — Normalize + EDA
+
+```bat
+scripts\run_normalize.bat
+```
+
+Normalized: `data/normalized/variant_03/*.csv`  
+Ноутбук: `notebooks/week3_eda.ipynb`  
+Контракт: `docs/Data_Contract.md`
 
 ## GitHub
 
