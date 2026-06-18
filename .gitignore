@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+
+# Conda
+.conda/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+Thumbs.db
+Desktop.ini
+
+# Data
+data/raw/**/*.json
+!data/raw/.gitkeep
+
+# Jupyter
+.ipynb_checkpoints/
+
+# pytest
+.pytest_cache/
+htmlcov/
+.coverage
+
+# Airflow / Docker
+airflow/logs/
+airflow/airflow.db
