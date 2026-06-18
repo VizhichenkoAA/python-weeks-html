@@ -1,0 +1,4 @@
+city_id,date,T_mean,P_sum,wind_max,rainy_hours,obs_hours,city_name,country_code,latitude,longitude,timezone,wind_rank,is_anomaly
+RU_NSK,2025-01-01,-12.975,0.5,15.6,5,24,Новосибирск,RU,55.0084,82.9357,Asia/Novosibirsk,10.0,True
+RU_NSK,2025-01-04,-0.4458333333333333,2.2,21.3,12,24,Новосибирск,RU,55.0084,82.9357,Asia/Novosibirsk,5.0,True
+RU_NSK,2025-01-09,-13.383333333333333,1.6,16.4,10,24,Новосибирск,RU,55.0084,82.9357,Asia/Novosibirsk,8.0,True

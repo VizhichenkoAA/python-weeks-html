@@ -1,0 +1,2 @@
+city_id,date,T_mean,P_sum,wind_max,rainy_hours,obs_hours,city_name,country_code,latitude,longitude,timezone,wind_rank
+RU_NSK,2025-01-14,-10.666666666666666,0.0,19.0,0,24,Новосибирск,RU,55.0084,82.9357,Asia/Novosibirsk,1.0

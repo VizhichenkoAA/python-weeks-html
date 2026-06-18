@@ -65,4 +65,5 @@ mart:
   reference_file: reference/cities.csv
 postgres:
   table: mart_variant_03
-  # Подключение: переменная окружения DATABASE_URL (см. .env.example)
+  port: 5433
+  # Подключение: DATABASE_URL в .env (порт 5433 — чтобы не конфликтовать с локальным Postgres на 5432)

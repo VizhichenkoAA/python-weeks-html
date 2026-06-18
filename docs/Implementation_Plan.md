@@ -1,80 +1,65 @@
 # Implementation Plan — вариант 03
 
 ## 1. Краткое описание задачи
-Архив погоды для Новосибирска из Open-Meteo Archive API: загрузка JSON (raw), приведение к почасовой таблице (normalized), дневная витрина с KPI (mart) и справочником городов.
-
-## 2. Цель и ожидаемый результат
-- Файлы: `data/raw/variant_03/*.json`, `data/normalized/variant_03/*.csv`, `data/mart/variant_03/mart_daily_*.csv`
-- KPI: T_mean, P_sum, rainy_hours, топ-5 дней по ветру (wind_max / wind_rank)
-- Далее: Postgres, BI, DQ, Airflow (недели 5–14)
-
-## 3. Контуры системы (high level)
-Open-Meteo API → RAW (JSON) → Normalize (CSV hourly) → Mart (CSV daily + reference) → Postgres → Metabase → DQ → Airflow → LLM summary
-
-## 4. Схема данных
-### 4.1 Raw слой
-- **Файл:** `data/raw/variant_03/open_meteo_<timestamp>.json`
-- **Ключи:** `_meta.city_id`, `hourly.time[]`
-- **Пример:** вложенный объект `hourly` с массивами полей API
-
-### 4.2 Normalized слой
-- **Таблица:** почасовые наблюдения (см. `docs/Data_Contract.md`)
-- **Поля:** ts, temperature_2m, relative_humidity_2m, precipitation, wind_speed_10m, city_id
-
-### 4.3 Mart слой (агрегаты)
-- **Таблица:** `mart_daily_*`
-- **Периодичность:** 1 строка на день
-- **KPI:** T_mean, P_sum, rainy_hours, wind_max, wind_rank (топ-5 по ветру)
-
-### 4.4 Postgres (неделя 5)
-- **Таблица:** `mart_variant_03`
-- **Загрузка:** `src/sem2_de/load.py`, стратегия `replace`
-- **Проверки:** `docs/sql_checks.md`
-
-## 5. Data Quality (DQ)
-- NOT NULL: ts, city_id
-- Диапазоны температуры/влажности/осадков (в `normalize.py`)
-- Уникальность (city_id, ts)
-- Referential: join `reference/cities.csv` с `validate='many_to_one'`
-- Freshness: `_meta.fetched_at_utc` в raw
-
-## 6. Инкрементальность и идемпотентность
-- Каждый запуск создаёт новый файл с timestamp в имени
-- Дедупликация по (city_id, ts) при normalize
-- Повторный запуск не перезаписывает старые артефакты
-
-## 7. План тестирования
-- `broken_env.py` — smoke после setup
-- `broken_pandas_read.py` — sep и пропуски
-- `broken_merge.py` — many-to-many
-- Ручной прогон `scripts\run_pipeline.bat`
-- `broken_sqlite_commit.py` — commit в SQLite
-- `scripts\run_load.bat` + запросы из `docs/sql_checks.md`
+Архив погоды для Новосибирска из Open-Meteo: RAW → NORMALIZED → MART → Postgres → BI → DQ → Airflow → ML → LLM.
 
 ## 8. План-график (по неделям)
-| Неделя | Что делаю | Артефакт/ссылка |
+
+| Неделя | Что делаю | Артефакт |
 |---|---|---|
-| 1 | Структура, conda, setup_env.bat | `scripts/setup_env.bat`, `broken_env.py` |
-| 2 | Extract Open-Meteo | `src/sem2_de/extract.py`, `data/raw/` |
-| 3 | Normalize + EDA | `normalize.py`, `notebooks/week3_eda.ipynb` |
-| 4 | Mart + reference join | `mart.py`, `data/mart/` |
-| 5 | Postgres load mart | `load.py`, `docs/sql_checks.md`, `docker-compose.yml` |
-| 6 | Full pipeline | TBD |
-| 7 | Визуализация | TBD |
-| 8 | DQ checks | TBD |
-| 9 | Data Contract финал | `docs/Data_Contract.md` |
-| 10 | Docker + Metabase | TBD |
-| 11 | Airflow DAG | TBD |
-| 12 | Incremental | TBD |
-| 13 | ML / anomalies | TBD |
-| 14 | LLM summary | TBD |
+| 1 | Conda, структура | `setup_env.bat`, `broken_env.py` |
+| 2 | Extract | `extract.py`, `data/raw/` |
+| 3 | Normalize + EDA | `normalize.py`, `week3_eda.ipynb` |
+| 4 | Mart | `mart.py`, `data/mart/` |
+| 5 | Postgres load | `load.py`, `docker-compose.yml`, `sql_checks.md` |
+| 6 | Pipeline full/incremental | `pipeline.py`, `state.json`, `broken_append.py` |
+| 7 | Визуализация | `week7_viz.ipynb`, `docs/figures/` |
+| 8 | DQ | `dq.py`, `dq_report.json`, `tests/test_dq.py` |
+| 9 | Governance | `Data_Contract.md`, `data_dictionary.md` |
+| 10 | Docker BI | Metabase in compose, `docs/bi/` |
+| 11 | Airflow DAG | `airflow/dags/etl_variant_03.py` |
+| 12 | Period + DQ gate | period params, `dq >> load` |
+| 13 | ML / anomalies | `week13_ml.ipynb`, `docs/ml/` |
+| 14 | LLM summary | `llm_summary.py`, `docs/llm/summary.md` |
 
-## 9. Риски и ограничения
-- Лимиты и доступность Open-Meteo API
-- Часовой пояс Asia/Novosibirsk при агрегации по дням
-- Пропуски в hourly (null) — учитываются в агрегатах
+## 6. Инкрементальность и идемпотентность (week 6–12)
 
-## 10. Что использую из LLM
-- Помощь в структуре репозитория и шаблонах кода
-- Проверяю руками: API-ответ, типы полей, результаты CSV
-- Не делегирую LLM секреты и финальную сдачу без проверки
+### Full mode
+- Extract за весь период из конфига (`2025-01-01` … `2025-01-14`)
+- Transform → normalized + mart (новые файлы с timestamp)
+- Load: `if_exists=replace` в Postgres
+- Повторный full: таблица пересоздаётся, дублей нет
+
+### Incremental mode
+- Watermark: `data/state.json` → поле `watermark` = последний успешно обработанный `end_date`
+- Следующий запуск: `start = watermark + 1 day`, окно до 7 дней
+- Load: **delete period + insert** по `(date)` — retry-safe
+- Watermark обновляется только после успешного pipeline (включая load)
+
+### Business key
+`(city_id, date)` на mart — уникальность дня для города.
+
+### State file
+`data/state.json`: `variant_id`, `source_type`, `watermark`, `last_success_utc`
+
+### Airflow period (week 12)
+- Один DAG Run = один день `{{ ds }}`
+- Extract/load с `--start {{ ds }} --end {{ ds }}`
+- Порядок: `extract >> transform >> dq >> load`
+- При DQ FAIL load не выполняется
+
+### Retry safety
+- Postgres load не использует слепой append без delete period
+- Повтор DAG run за тот же `ds` перезаписывает тот же период
+
+## Команды запуска
+
+```bat
+scripts\pipeline.bat full
+scripts\pipeline.bat incremental
+scripts\run_dq.bat
+scripts\run_postgres.bat
+scripts\run_load.bat
+scripts\run_airflow.bat
+scripts\run_llm_summary.bat
+```

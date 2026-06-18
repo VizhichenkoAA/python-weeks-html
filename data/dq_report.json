@@ -1,0 +1,134 @@
+{
+  "generated_at_utc": "2026-06-18T12:55:14Z",
+  "summary": {
+    "PASS": 11,
+    "WARNING": 0,
+    "FAIL": 0
+  },
+  "checks": [
+    {
+      "name": "non_empty",
+      "layer": "normalized",
+      "status": "PASS",
+      "reason": "table has rows",
+      "details": {
+        "rows": 24
+      }
+    },
+    {
+      "name": "not_null_critical",
+      "layer": "normalized",
+      "status": "PASS",
+      "reason": "no nulls in critical columns",
+      "details": {
+        "null_counts": {
+          "ts": 0,
+          "city_id": 0
+        }
+      }
+    },
+    {
+      "name": "unique_business_key",
+      "layer": "normalized",
+      "status": "PASS",
+      "reason": "unique key",
+      "details": {
+        "keys": [
+          "city_id",
+          "ts"
+        ],
+        "duplicate_rows": 0
+      }
+    },
+    {
+      "name": "range_temperature_2m",
+      "layer": "normalized",
+      "status": "PASS",
+      "reason": "temperature_2m in [-80,60]",
+      "details": {
+        "column": "temperature_2m",
+        "bad_rows": 0,
+        "low": -80,
+        "high": 60
+      }
+    },
+    {
+      "name": "range_relative_humidity_2m",
+      "layer": "normalized",
+      "status": "PASS",
+      "reason": "relative_humidity_2m in [0,100]",
+      "details": {
+        "column": "relative_humidity_2m",
+        "bad_rows": 0,
+        "low": 0,
+        "high": 100
+      }
+    },
+    {
+      "name": "non_negative_precipitation",
+      "layer": "normalized",
+      "status": "PASS",
+      "reason": "no negative values",
+      "details": {
+        "column": "precipitation",
+        "bad_rows": 0
+      }
+    },
+    {
+      "name": "non_empty",
+      "layer": "mart",
+      "status": "PASS",
+      "reason": "table has rows",
+      "details": {
+        "rows": 1
+      }
+    },
+    {
+      "name": "not_null_critical",
+      "layer": "mart",
+      "status": "PASS",
+      "reason": "no nulls in critical columns",
+      "details": {
+        "null_counts": {
+          "city_id": 0,
+          "date": 0
+        }
+      }
+    },
+    {
+      "name": "unique_business_key",
+      "layer": "mart",
+      "status": "PASS",
+      "reason": "unique key",
+      "details": {
+        "keys": [
+          "city_id",
+          "date"
+        ],
+        "duplicate_rows": 0
+      }
+    },
+    {
+      "name": "non_negative_P_sum",
+      "layer": "mart",
+      "status": "PASS",
+      "reason": "no negative values",
+      "details": {
+        "column": "P_sum",
+        "bad_rows": 0
+      }
+    },
+    {
+      "name": "range_obs_hours",
+      "layer": "mart",
+      "status": "PASS",
+      "reason": "obs_hours in [1,24]",
+      "details": {
+        "column": "obs_hours",
+        "bad_rows": 0,
+        "low": 1,
+        "high": 24
+      }
+    }
+  ]
+}

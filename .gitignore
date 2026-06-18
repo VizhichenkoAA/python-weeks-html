@@ -36,3 +36,6 @@ airflow/airflow.db
 
 # Week 5 SQLite demo
 example.db
+
+# Week 6 append demo
+out_append_demo.csv

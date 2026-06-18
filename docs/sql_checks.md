@@ -6,7 +6,9 @@
 docker exec -it tp-v03-postgres psql -U tp_user -d tp_variant_03
 ```
 
-Или через Python/SQLAlchemy с тем же `DATABASE_URL`, что и `load.py`.
+Или через Python/SQLAlchemy с тем же `DATABASE_URL`, что и `load.py` (порт **5433** в Docker).
+
+Если `load` падает с `UnicodeDecodeError` на Windows — проверьте, что на 5432 не занят другой Postgres; наш контейнер слушает **5433**.
 
 ---
 

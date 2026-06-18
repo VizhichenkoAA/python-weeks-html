@@ -92,7 +92,7 @@ scripts\run_postgres.bat
 docker ps
 ```
 
-Параметры: `localhost:5432`, БД `tp_variant_03`, user `tp_user` (см. `docker-compose.yml`).
+Параметры: `localhost:5433`, БД `tp_variant_03`, user `tp_user` (см. `docker-compose.yml`). Порт 5433 выбран, чтобы не конфликтовать с локальным Postgres на 5432.
 
 ### 2. Подключение (секреты в `.env`)
 
@@ -100,7 +100,7 @@ docker ps
 copy .env.example .env
 ```
 
-`DATABASE_URL=postgresql+psycopg2://tp_user:tp_pass@localhost:5432/tp_variant_03`
+`DATABASE_URL=postgresql+psycopg2://tp_user:tp_pass@localhost:5433/tp_variant_03`
 
 ### 3. Загрузка mart в Postgres
 
@@ -120,6 +120,92 @@ conda run -n tp-v03 python broken_sqlite_commit.py
 
 ---
 
+## Недели 6–14 — полный продукт
+
+### Неделя 6 — pipeline + state
+
+```bat
+scripts\pipeline.bat full
+scripts\pipeline.bat incremental
+```
+
+- `src/sem2_de/pipeline.py` — режимы `full` / `incremental`
+- `data/state.json` — watermark
+- Часть 0: `broken_append.py`
+
+### Неделя 7 — визуализация
+
+- `notebooks/week7_viz.ipynb`
+- `docs/figures/week7_*.png`
+- Часть 0: `broken_plot_dates.py`
+
+### Неделя 8 — DQ
+
+```bat
+scripts\run_dq.bat
+conda run -n tp-v03 pytest tests/test_dq.py
+```
+
+- `src/sem2_de/dq.py`, `data/dq_report.json`, `docs/dq.md`
+- Часть 0: `broken_dq_assert.py`
+
+### Неделя 9 — Data Governance
+
+- `docs/Data_Contract.md` (v1.1 + changelog)
+- `docs/data_dictionary.md`
+- Часть 0: `broken_units.py`
+
+### Неделя 10 — Docker + Metabase + BI
+
+```bat
+scripts\run_postgres.bat
+docker compose up -d metabase
+```
+
+- Metabase: http://localhost:3000
+- Postgres внутри Docker-сети: host `postgres`, с Windows: `localhost:5433`
+- Скриншоты: `docs/bi/` (см. `scripts/generate_bi_screenshots.py`)
+
+### Неделя 11 — Airflow
+
+```bat
+scripts\run_airflow.bat
+```
+
+- UI: http://localhost:8080 (`airflow` / `airflow`)
+- DAG: `airflow/dags/etl_variant_03.py`
+- Часть 0: `airflow/dags/broken_dag.py`
+
+### Неделя 12 — инкремент + DQ gate
+
+- DAG: `extract >> transform >> dq >> load`
+- Load: delete period + insert (retry-safe)
+- Период: `--start` / `--end` или `{{ ds }}` в Airflow
+
+### Неделя 13 — ML / аномалии
+
+- `notebooks/week13_ml.ipynb`
+- `docs/ml/week13_summary.md`, `anomalies_top.csv`
+- Часть 0: `broken_ml_leakage.py`
+
+### Неделя 14 — LLM summary (финал)
+
+```bat
+scripts\run_llm_summary.bat
+```
+
+- `src/sem2_de/llm_summary.py` → `docs/llm/summary.md`
+- Правила: `docs/LLM_Rules.md`
+- API-ключ в `.env` (опционально; без ключа — template mode)
+
+### Одна команда (full ETL + DQ + load)
+
+```bat
+scripts\pipeline.bat full
+```
+
+---
+
 ## Учебные скрипты (часть 0)
 
 ```bat
@@ -127,6 +213,11 @@ conda run -n tp-v03 python broken_env.py
 conda run -n tp-v03 python broken_pandas_read.py
 conda run -n tp-v03 python broken_merge.py
 conda run -n tp-v03 python broken_sqlite_commit.py
+conda run -n tp-v03 python broken_append.py demo
+conda run -n tp-v03 python broken_plot_dates.py both
+conda run -n tp-v03 python broken_dq_assert.py
+conda run -n tp-v03 python broken_units.py
+conda run -n tp-v03 python broken_ml_leakage.py
 ```
 
 ---
@@ -136,12 +227,16 @@ conda run -n tp-v03 python broken_sqlite_commit.py
 ```
 configs/          # variant_03.yml
 data/raw|normalized|mart|state/
-docs/             # Data_Contract, Implementation_Plan, LLM_Usage_Log
-notebooks/        # week3_eda.ipynb
+data/dq_report.json
+docs/             # Data_Contract, dq, bi, ml, llm, airflow
+notebooks/        # week3_eda, week7_viz, week13_ml
+airflow/dags/     # etl_variant_03.py
 reference/        # cities, countries, ...
-scripts/          # setup_env.bat, run_*.bat
-src/sem2_de/      # extract, normalize, mart, load, cli
+scripts/          # pipeline.bat, run_*.bat
+src/sem2_de/      # extract, transform, mart, load, dq, pipeline, llm_summary
 tests/
+docker-compose.yml
+docker-compose.airflow.yml
 ```
 
-Документация: `docs/Data_Contract.md`, `docs/Implementation_Plan.md`
+Документация: `docs/Implementation_Plan.md`, `docs/Data_Contract.md`, `docs/LLM_Usage_Log.md`
