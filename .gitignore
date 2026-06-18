@@ -20,7 +20,7 @@ Desktop.ini
 
 # Data
 data/raw/**/*.json
-!data/raw/.gitkeep
+!data/raw/variant_03/open_meteo_*.json
 
 # Jupyter
 .ipynb_checkpoints/
